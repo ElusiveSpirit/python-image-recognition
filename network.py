@@ -153,6 +153,17 @@ class Network(object):
         return output_activations - y
 
     @staticmethod
+    def get_image_data(value):
+        assert len(value) == 28 * 28
+        data = []
+        for i in range(28):
+            data.append([])
+            for j in range(28):
+                char = '.' if value[i * 28 + j] else None
+                data[i].append(char)
+        return data
+
+    @staticmethod
     def draw_image(value):
         assert len(value) == 28 * 28
         for i in range(28):

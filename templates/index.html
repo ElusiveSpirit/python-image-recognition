@@ -1,0 +1,184 @@
+<!DOCTYPE HTML>
+<title>Image recognition</title>
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<script src="https://unpkg.com/vue"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<style>
+  body {
+    margin: 2rem;
+    background: #eee;
+  }
+
+  canvas {
+    background: white;
+    box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.2);
+  }
+
+  .symbol-div {
+    background: white;
+    box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.2);
+    width: 300px;
+    height: 300px;
+    line-height: 10px;
+  }
+  .code {
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+  }
+</style>
+
+<div id="app">
+  <el-row :gutter="20">
+    <el-col :span="12">
+      <canvas id="canvas"
+              v-on:mousedown="handleMouseDown"
+              v-on:mouseup="handleMouseUp"
+              v-on:mousemove="handleMouseMove"
+              width="300px" height="300px">
+      </canvas>
+    </el-col>
+    <el-col :span="12">
+      <div class="symbol-div">
+        <template v-for="i in representedValue" class="code">
+          <span v-for="j in i" class="code">
+            <template v-if="j">.</template>
+            <template v-else>&nbsp; </template>
+          </span>
+          <br>
+        </template>
+      </div>
+    </el-col>
+  </el-row>
+  <el-row>
+    <el-col :span="12">
+      <el-button @click.native="clear()" type="default">Clear</el-button>
+      <el-button @click.native="run()" :type="btnType" :loading="loading">
+        <template v-if="loading">Loading</template>
+        <template v-else>Recognize</template>
+      </el-button>
+    </el-col>
+    <el-col :span="12">
+      <template v-if="printedResult">
+        Result value is "{{ printedResult }}"
+      </template>
+    </el-col>
+  </el-row>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            loading: false,
+            result: -1,
+            representedValue: null,
+            mouse: {
+                current: {
+                    x: 0,
+                    y: 0
+                },
+                previous: {
+                    x: 0,
+                    y: 0
+                },
+                down: false
+            }
+        },
+        computed: {
+            printedResult: function () {
+                if (this.result === null) {
+                    return 'Error';
+                }
+                if (this.result !== -1) {
+                    return this.result;
+                }
+            },
+            currentMouse: function () {
+                var c = document.getElementById("canvas");
+                var rect = c.getBoundingClientRect();
+
+                return {
+                    x: this.mouse.current.x - rect.left,
+                    y: this.mouse.current.y - rect.top
+                }
+            },
+            btnType: function () {
+                if (this.result === -1) {
+                    return 'primary';
+                }
+                return this.result ? 'success' : 'error';
+            }
+        },
+        methods: {
+            run: function () {
+                this.loading = true;
+                var _this = this;
+                var c = document.getElementById("canvas");
+                axios.post('/recognize/', {
+                        image: c.toDataURL()
+                    })
+                    .then(function (response) {
+                        _this.loading = false;
+                        _this.result = response.data.digit;
+                        _this.representedValue = response.data.represented;
+                    })
+                    .catch(function (error) {
+                        _this.loading = false;
+                    })
+            },
+            clear: function () {
+                document.getElementById("canvas").getContext("2d").clearRect(0, 0, 300, 300);
+            },
+            draw: function (event) {
+                // requestAnimationFrame(this.draw);
+                if (this.mouse.down) {
+                    var c = document.getElementById("canvas");
+
+                    var ctx = c.getContext("2d");
+
+                    ctx.clearRect(0, 0, 300, 300);
+
+
+                    ctx.lineTo(this.currentMouse.x, this.currentMouse.y);
+                    ctx.strokeStyle = "#F63E02";
+                    ctx.lineWidth = 2;
+                    ctx.stroke()
+                }
+
+            },
+            handleMouseDown: function (event) {
+                this.mouse.down = true;
+                this.mouse.current = {
+                    x: event.pageX,
+                    y: event.pageY
+                };
+
+                var c = document.getElementById("canvas");
+                var ctx = c.getContext("2d");
+
+                ctx.moveTo(this.currentMouse.x, this.currentMouse.y)
+            },
+            handleMouseUp: function () {
+                this.mouse.down = false;
+            },
+            handleMouseMove: function (event) {
+
+                this.mouse.current = {
+                    x: event.pageX,
+                    y: event.pageY
+                };
+
+                this.draw(event)
+
+            }
+        },
+        ready: function () {
+            var c = document.getElementById("canvas");
+            var ctx = c.getContext("2d");
+            ctx.translate(0.5, 0.5);
+            ctx.imageSmoothingEnabled = false;
+        }
+    })
+</script>

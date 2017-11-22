@@ -11,7 +11,7 @@ def prepare_img(img, size=(28, 28)):
 
 def get_img_data(img):
     img_data = img.getdata()
-    img_data = np.array(list(map(lambda p: np.array([abs(p / 255 - 1)]), img_data)))
+    img_data = np.array(list(map(lambda p: np.array([abs(p / 255 - 1) if p != 0 else 0]), img_data)))
     return img_data
 
 

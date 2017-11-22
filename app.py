@@ -1,10 +1,25 @@
+import base64
+
 from flask import Flask, jsonify, request, render_template
 from io import BytesIO
 
 from network import Network
 from utils import load_image
 
-app = Flask(__name__)
+
+class CustomFlask(Flask):
+    jinja_options = Flask.jinja_options.copy()
+    jinja_options.update(dict(
+        block_start_string='(%',
+        block_end_string='%)',
+        variable_start_string='((',
+        variable_end_string='))',
+        comment_start_string='(#',
+        comment_end_string='#)',
+    ))
+
+
+app = CustomFlask(__name__)
 net = Network.load_from_file()
 
 
@@ -15,14 +30,15 @@ def hello_world():
 
 @app.route('/recognize/', methods=['POST'])
 def recognize_file():
-    if 'image' not in request.files:
+    data = request.get_json()
+    if 'image' not in data:
         return jsonify({'msg': 'Image required'}), 400
-
-    image = request.files['image']
-    image_data = load_image(BytesIO(image.read()))
+    image = data['image'].split(',')[1]
+    image_data = load_image(BytesIO(base64.b64decode(image)))
     value = net.recognize(image_data)
+    image_data = net.get_image_data(image_data)
 
-    return jsonify({'digit': int(value)})
+    return jsonify({'digit': int(value), 'represented': image_data})
 
 
 if __name__ == '__main__':
