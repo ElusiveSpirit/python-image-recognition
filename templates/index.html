@@ -60,7 +60,7 @@
       </el-button>
     </el-col>
     <el-col :span="12">
-      <template v-if="printedResult">
+      <template v-if="printedResult !== null">
         Result value is "{{ printedResult }}"
       </template>
     </el-col>
@@ -94,6 +94,7 @@
                 if (this.result !== -1) {
                     return this.result;
                 }
+                return null;
             },
             currentMouse: function () {
                 var c = document.getElementById("canvas");
@@ -129,7 +130,14 @@
                     })
             },
             clear: function () {
-                document.getElementById("canvas").getContext("2d").clearRect(0, 0, 300, 300);
+                var ctx = document.getElementById("canvas").getContext('2d');     // gets reference to canvas context
+                ctx.beginPath();
+                ctx.save();
+
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.clearRect(0, 0, 300, 300);
+
+                ctx.restore();
             },
             draw: function (event) {
                 // requestAnimationFrame(this.draw);
