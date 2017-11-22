@@ -6,8 +6,9 @@
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <style>
   body {
-    margin: 2rem;
+    margin: 2rem auto;
     background: #eee;
+    max-width: 1000px;
   }
 
   canvas {
@@ -31,7 +32,7 @@
 
 <div id="app">
   <el-row :gutter="20">
-    <el-col :span="12">
+    <el-col :span="10">
       <canvas id="canvas"
               v-on:mousedown="handleMouseDown"
               v-on:mouseup="handleMouseUp"
@@ -39,7 +40,7 @@
               width="300px" height="300px">
       </canvas>
     </el-col>
-    <el-col :span="12">
+    <el-col :span="10">
       <div class="symbol-div">
         <template v-for="i in representedValue" class="code">
           <span v-for="j in i" class="code">
@@ -50,16 +51,23 @@
         </template>
       </div>
     </el-col>
+    <el-col :span="4">
+      <ol v-if="outputLayer" start="0">
+        <li v-for="l in outputLayer">
+          {{ l }}
+        </li>
+      </ol>
+    </el-col>
   </el-row>
   <el-row>
-    <el-col :span="12">
+    <el-col :span="10">
       <el-button @click.native="clear()" type="default">Clear</el-button>
       <el-button @click.native="run()" :type="btnType" :loading="loading">
         <template v-if="loading">Loading</template>
         <template v-else>Recognize</template>
       </el-button>
     </el-col>
-    <el-col :span="12">
+    <el-col :span="10">
       <template v-if="printedResult !== null">
         Result value is "{{ printedResult }}"
       </template>
@@ -74,6 +82,7 @@
             loading: false,
             result: -1,
             representedValue: null,
+            outputLayer: [],
             mouse: {
                 current: {
                     x: 0,
@@ -124,6 +133,7 @@
                         _this.loading = false;
                         _this.result = response.data.digit;
                         _this.representedValue = response.data.represented;
+                        _this.outputLayer = response.data.layer;
                     })
                     .catch(function (error) {
                         _this.loading = false;

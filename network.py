@@ -28,9 +28,15 @@ class Network(object):
         The value is in 0..9
         Otherwise = None
         """
-        ret = np.argmax(self._feedforward(data))
-        if ret <= 9:
+        layer = self._feedforward(data)
+        ret = np.argmax(layer)
+        percent = max(layer)
+        if ret <= 9 and percent > 0.7:
             return ret
+
+    def output_layer(self, data):
+        layer = self._feedforward(data)
+        return ['{0:.6f}'.format(l[0]) for l in layer]
 
     def train(self, training_data, epochs, mini_batch_size, eta, test_data=None):
         """Train the neural network using mini-batch stochastic

@@ -36,9 +36,14 @@ def recognize_file():
     image = data['image'].split(',')[1]
     image_data = load_image(BytesIO(base64.b64decode(image)))
     value = net.recognize(image_data)
+    layer = net.output_layer(image_data)
     image_data = net.get_image_data(image_data)
 
-    return jsonify({'digit': int(value), 'represented': image_data})
+    return jsonify({
+        'digit': int(value) if value else None,
+        'represented': image_data,
+        'layer': layer
+    })
 
 
 if __name__ == '__main__':
