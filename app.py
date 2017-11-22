@@ -1,60 +1,29 @@
-import pickle
+from flask import Flask, jsonify, request, render_template
+from io import BytesIO
 
-from flask import Flask, jsonify, request
-from flask_redis import FlaskRedis
+from network import Network
+from utils import load_image
 
 app = Flask(__name__)
-redis_store = FlaskRedis(app)
+net = Network.load_from_file()
 
-TEACH_STATUS = 'teach_status'
-
-##############################################################
-#                       Utils
-##############################################################
-
-
-def redis_set(key, value):
-    redis_store.set(key, pickle.dumps(value))
-
-
-def redis_get(key):
-    value = redis_store.get(key)
-    if value:
-        return pickle.loads(value)
-
-
-def init():
-    redis_set(TEACH_STATUS, {'status': None, 'percent': 0})
-
-
-##############################################################
-#                       Views
-##############################################################
 
 @app.route('/')
 def hello_world():
-    return 'Hello World!'
-
-
-@app.route('/teach/', methods=['GET', 'POST'])
-def teach_neural_net():
-    if request.method == 'POST':
-        # Start teaching
-        pass
-        return jsonify({'status': 'active', 'percent': 0}), 201
-    status = redis_get(TEACH_STATUS)
-    return jsonify(status)
+    return render_template('index.html')
 
 
 @app.route('/recognize/', methods=['POST'])
 def recognize_file():
     if 'image' not in request.files:
         return jsonify({'msg': 'Image required'}), 400
+
     image = request.files['image']
-    print(image)
-    return jsonify({'digit': 'Some recognized image'})
+    image_data = load_image(BytesIO(image.read()))
+    value = net.recognize(image_data)
+
+    return jsonify({'digit': int(value)})
 
 
 if __name__ == '__main__':
-    init()
     app.run()

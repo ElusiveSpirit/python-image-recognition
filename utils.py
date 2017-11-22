@@ -15,12 +15,8 @@ def get_img_data(img):
     return img_data
 
 
-def load_image(image_file):
-    img = prepare_img(image_file)
+def load_image(image_file_name):
+    img = Image.open(image_file_name)
+    img = prepare_img(img)
     img_data = get_img_data(img)
     return img_data
-
-
-def load_image_from_file(image_file_name):
-    img = Image.open(image_file_name)
-    return load_image(img)
