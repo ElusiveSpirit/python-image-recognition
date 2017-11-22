@@ -152,6 +152,15 @@ class Network(object):
         \partial a for the output activations."""
         return output_activations - y
 
+    @staticmethod
+    def draw_image(value):
+        assert len(value) == 28 * 28
+        for i in range(28):
+            for j in range(28):
+                char = '.' if value[i * 28 + j] else ' '
+                print(char, end='')
+            print()
+
 
 def sigmoid(z):
     return 1.0 / (1.0 + np.exp(-z))
