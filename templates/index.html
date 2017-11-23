@@ -61,7 +61,7 @@
     </el-col>
     <el-col :span="5">
       <el-table
-          :data="outputLayer"
+          :data="answers"
           :row-class-name="tableRowClassName">
         <el-table-column
             prop="index"
@@ -69,8 +69,8 @@
             width="60">
         </el-table-column>
         <el-table-column
-            prop="percent"
-            label="Probability">
+            prop="count"
+            label="Count">
         </el-table-column>
       </el-table>
     </el-col>
@@ -98,7 +98,7 @@
             loading: false,
             result: -1,
             representedValue: null,
-            outputLayer: [],
+            answers: [],
             mouse: {
                 current: {
                     x: 0,
@@ -113,9 +113,6 @@
         },
         computed: {
             printedResult: function () {
-                if (this.result === null) {
-                    return 'Error';
-                }
                 if (this.result !== -1) {
                     return this.result;
                 }
@@ -149,12 +146,7 @@
                         _this.loading = false;
                         _this.result = response.data.digit;
                         _this.representedValue = response.data.represented;
-                        _this.outputLayer = response.data.layer.map(function (el, index) {
-                            return {
-                                'index': index,
-                                'percent': el
-                            }
-                        });
+                        _this.answers = response.data.answers;
                     })
                     .catch(function (error) {
                         _this.loading = false;
@@ -171,7 +163,6 @@
                 ctx.restore();
             },
             tableRowClassName: function (data) {
-                console.log(data.rowIndex, this.result);
                 var row = data.row;
                 var rowIndex = data.rowIndex;
 

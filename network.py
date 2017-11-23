@@ -32,7 +32,7 @@ class Network(object):
         layer = self._feedforward(data)
         ret = np.argmax(layer)
         percent = max(layer)
-        if ret <= 9 and percent > 0.7:
+        if ret <= 9 and percent > 0.6:
             return ret
 
     def output_layer(self, data):

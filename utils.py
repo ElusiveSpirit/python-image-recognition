@@ -1,6 +1,41 @@
+import os
+import operator
+from collections import defaultdict
+
 import numpy as np
 
 from PIL import Image
+
+from network import Network
+
+
+def get_all_networks_files(basedir='./networks'):
+    networks_files = []
+    for dirname, _, filenames in os.walk(basedir):
+        for filename in filenames:
+            networks_files.append(os.path.join(dirname, filename))
+    return networks_files
+
+
+def get_networks():
+    networks_files = get_all_networks_files()
+    return [Network.load_from_file(f) for f in networks_files]
+
+
+def get_decision(value_list):
+    value_dict = defaultdict(int)
+    for v in value_list:
+        value_dict[v] += 1
+    value_list = sorted(value_dict.items(), key=operator.itemgetter(1), reverse=True)
+    result = value_list[0][0]
+    if len(value_list) > 1:
+        if value_list[0][0] is None and value_list[0][1] == value_list[1][1]:
+            result = value_list[1][0]
+
+    return {
+        'result': result,
+        'answers': value_dict
+    }
 
 
 def prepare_img(img, size=(28, 28)):

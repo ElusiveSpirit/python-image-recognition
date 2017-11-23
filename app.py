@@ -4,7 +4,7 @@ from flask import Flask, jsonify, request, render_template
 from io import BytesIO
 
 from network import Network
-from utils import load_image
+from utils import load_image, get_networks, get_decision
 
 
 class CustomFlask(Flask):
@@ -20,7 +20,7 @@ class CustomFlask(Flask):
 
 
 app = CustomFlask(__name__)
-net = Network.load_from_file()
+networks = get_networks()
 
 
 @app.route('/')
@@ -35,14 +35,21 @@ def recognize_file():
         return jsonify({'msg': 'Image required'}), 400
     image = data['image'].split(',')[1]
     image_data = load_image(BytesIO(base64.b64decode(image)))
-    value = net.recognize(image_data)
-    layer = net.output_layer(image_data)
-    image_data = net.get_image_data(image_data)
+
+    value_list = [net.recognize(image_data) for net in networks]
+    result = get_decision(value_list)
+    image_data = Network.get_image_data(image_data)
 
     return jsonify({
-        'digit': int(value) if value else None,
+        'digit': str(result['result']),
         'represented': image_data,
-        'layer': layer
+        'answers': [
+            {
+                'index': str(key),
+                'count': str(value)
+            }
+            for key, value in result['answers'].items()
+        ]
     })
 
 
