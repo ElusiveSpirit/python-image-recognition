@@ -28,11 +28,19 @@
     height: 10px;
     display: inline-block;
   }
+
+  .el-table td, .el-table th {
+    padding: 4px 0;
+  }
+
+  .el-table .success-row {
+    background: #f0f9eb;
+  }
 </style>
 
 <div id="app">
   <el-row :gutter="20">
-    <el-col :span="10">
+    <el-col :span="8">
       <canvas id="canvas"
               v-on:mousedown="handleMouseDown"
               v-on:mouseup="handleMouseUp"
@@ -40,7 +48,7 @@
               width="300px" height="300px">
       </canvas>
     </el-col>
-    <el-col :span="10">
+    <el-col :span="8">
       <div class="symbol-div">
         <template v-for="i in representedValue" class="code">
           <span v-for="j in i" class="code">
@@ -51,12 +59,20 @@
         </template>
       </div>
     </el-col>
-    <el-col :span="4">
-      <ol v-if="outputLayer" start="0">
-        <li v-for="l in outputLayer">
-          {{ l }}
-        </li>
-      </ol>
+    <el-col :span="5">
+      <el-table
+          :data="outputLayer"
+          :row-class-name="tableRowClassName">
+        <el-table-column
+            prop="index"
+            label="Digit"
+            width="60">
+        </el-table-column>
+        <el-table-column
+            prop="percent"
+            label="Probability">
+        </el-table-column>
+      </el-table>
     </el-col>
   </el-row>
   <el-row>
@@ -133,7 +149,12 @@
                         _this.loading = false;
                         _this.result = response.data.digit;
                         _this.representedValue = response.data.represented;
-                        _this.outputLayer = response.data.layer;
+                        _this.outputLayer = response.data.layer.map(function (el, index) {
+                            return {
+                                'index': index,
+                                'percent': el
+                            }
+                        });
                     })
                     .catch(function (error) {
                         _this.loading = false;
@@ -148,6 +169,16 @@
                 ctx.clearRect(0, 0, 300, 300);
 
                 ctx.restore();
+            },
+            tableRowClassName: function (data) {
+                console.log(data.rowIndex, this.result);
+                var row = data.row;
+                var rowIndex = data.rowIndex;
+
+                if (rowIndex === this.result) {
+                    return 'success-row';
+                }
+                return '';
             },
             draw: function (event) {
                 // requestAnimationFrame(this.draw);
