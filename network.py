@@ -21,6 +21,7 @@ class Network(object):
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
         self.weights = [np.random.randn(y, x)
                         for x, y in zip(sizes[:-1], sizes[1:])]
+        self.hyper_params = {}
 
     def recognize(self, data):
         """Return the recognized number.
@@ -47,6 +48,11 @@ class Network(object):
         network will be evaluated against the test data after each
         epoch, and partial progress printed out.  This is useful for
         tracking progress, but slows things down substantially."""
+        self.hyper_params = {
+            'epochs': epochs,
+            'mini_batch_size': mini_batch_size,
+            'eta': eta
+        }
 
         training_data = list(training_data)
         n = len(training_data)
@@ -72,7 +78,8 @@ class Network(object):
         data = {
             'biases': list(map(lambda x: x.tolist(), self.biases)),
             'weights': list(map(lambda x: x.tolist(), self.weights)),
-            'sizes': self.sizes
+            'sizes': self.sizes,
+            'hyper_params': self.hyper_params
         }
         with open(filename, 'w') as f:
             f.write(json.dumps(data))
@@ -83,6 +90,7 @@ class Network(object):
             data = json.loads(f.read())
 
         network = cls(data['sizes'])
+        network.hyper_params = data.get('hyper_params', {})
         network.biases = list(map(lambda x: np.array(x), data['biases']))
         network.weights = list(map(lambda x: np.array(x), data['weights']))
         return network
