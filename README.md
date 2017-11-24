@@ -48,7 +48,7 @@ from network import Network
 # 10  - output layer (from 0 to 9) 
 # You should change only hidden layer
 net = Network([784, 30, 10])
-# Feel free to change this parameters
+# Feel free to change these parameters
 # 20  - epoch count
 # 10  - batch size
 # 3.0 - training speed
