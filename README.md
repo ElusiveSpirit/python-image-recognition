@@ -2,6 +2,10 @@
 
 Simple demo app to recognize hand written digits with 3 layers neural net in pure python
 
+## Demo
+
+![Demo screenshot](static/demo_screenshot.png)
+
 [Try demo](https://python-image-recognition.herokuapp.com/)
 
 ## Run locally
