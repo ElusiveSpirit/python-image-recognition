@@ -45,6 +45,9 @@
               v-on:mousedown="handleMouseDown"
               v-on:mouseup="handleMouseUp"
               v-on:mousemove="handleMouseMove"
+              @ontouchstart="handleMouseDown"
+              @ontouchend="handleMouseUp"
+              @ontouchmove="handleMouseMove"
               width="300px" height="300px">
       </canvas>
     </el-col>
